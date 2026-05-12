@@ -1,6 +1,6 @@
 # CIS 410: Cybersecurity Automation
 ## About Me
-- **Name:** [Your Full Name]
+- **Name:** [Viktor Karatsupa]
 - **GitHub Username:** [Your GitHub Username]
 - **Major:** [Your Major]
 - **Semester:** [Current Semester]
