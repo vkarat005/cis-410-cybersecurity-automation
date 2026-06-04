@@ -22,13 +22,17 @@
 #   Step 2 — Run THIS workflow manually to configure sudo and install Docker
 #   Step 3 — Then push app files to trigger deploy-dev.yml
 # ─────────────────────────────────────────────────────────────────────────────
+
 name: "Setup — Dev Server"
+
 on:
   workflow_dispatch:   # Manual trigger only — no automatic runs
+
 jobs:
   setup:
     name: "Install Docker on Dev VM"
     runs-on: self-hosted
+
     steps:
       # ── Step 1: Configure passwordless sudo ────────────────────────────────
       # Pipeline SSH sessions are non-interactive — there is no terminal to
@@ -41,6 +45,7 @@ jobs:
         run: |
           echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
+
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} \
             "set -e
@@ -52,7 +57,9 @@ jobs:
                 'echo \"${{ secrets.DEV_USER }} ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/${{ secrets.DEV_USER }} && chmod 0440 /etc/sudoers.d/${{ secrets.DEV_USER }}'
               echo '=== Passwordless sudo configured ==='
             fi"
+
           rm /tmp/deploy_key
+
       # ── Step 2: Install Docker Engine ──────────────────────────────────────
       # Uses the official get.docker.com convenience script — fully supported
       # on Ubuntu 22.04 (Jammy) and 24.04 (Noble).
@@ -65,6 +72,7 @@ jobs:
         run: |
           echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
+
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
           set -e
@@ -81,7 +89,9 @@ jobs:
             sudo mkdir -p /opt/app && sudo chown $(whoami):$(whoami) /opt/app
           fi
           EOF
+
           rm /tmp/deploy_key
+
       # ── Step 3: Verify the installation ────────────────────────────────────
       # Confirms Docker and Docker Compose are available before deploy-dev.yml
       # runs. Also confirms /opt/app exists and is owned by the correct user.
@@ -90,16 +100,22 @@ jobs:
         run: |
           echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
+
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
           set -e
           echo "=== Logged in as: $(whoami) ==="
+
           echo "=== Docker version ==="
           docker --version
+
           echo "=== Docker Compose version ==="
           docker compose version
+
           echo "=== Deployment directory ==="
           ls -la /opt/app
+
           echo "=== Dev server is ready for deployment ==="
           EOF
+
           rm /tmp/deploy_key
