@@ -2,7 +2,7 @@
 ## About Me
 - **Name:** [Viktor Karatsupa]
 - **GitHub Username:** [Your GitHub Username]
-- **Major:** [Your Major]
+- **Major:** [cyber]
 - **Semester:** [Current Semester]
 ## About This Course
 This repository is my CIS 410: CyberSecurity Automation portfolio. In this course I will
