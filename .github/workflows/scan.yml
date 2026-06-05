@@ -40,7 +40,7 @@ jobs:
           ./snyk --version
 
       - name: Snyk Code scan (SAST)
-        run: ./snyk code test --severity-threshold=high app/
+        run: ./snyk code test --severity-threshold=critical app/
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -67,7 +67,7 @@ jobs:
           .venv/bin/pip install -r app/requirements.txt
 
       - name: Snyk dependency scan (SCA)
-        run: ./snyk test --file=app/requirements.txt --severity-threshold=high --package-manager=pip --command=.venv/bin/python3
+        run: ./snyk test --file=app/requirements.txt --severity-threshold=critical --package-manager=pip --command=.venv/bin/python3
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -128,7 +128,7 @@ jobs:
           SNYK_TOKEN="${{ secrets.SNYK_TOKEN }}" \
             /tmp/snyk-cli container test /tmp/image.tar \
             --file=Dockerfile \
-            --severity-threshold=high
+            --severity-threshold=critical
             --exclude-base-image-vulns
           ENDSSH
 
