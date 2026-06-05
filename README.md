@@ -38,3 +38,4 @@ Add it: GitHub repo → Settings → Secrets and variables → Actions → New r
 9. Run dast-scan.yml against dev → ZAP confirms fix  
 10. Promote to staging → run dast-scan.yml with staging target  
 11. Promote to production
+# Week 5 security scan test
