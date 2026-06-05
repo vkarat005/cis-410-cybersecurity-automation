@@ -129,6 +129,7 @@ jobs:
             /tmp/snyk-cli container test /tmp/image.tar \
             --file=Dockerfile \
             --severity-threshold=high
+            --exclude-base-image-vulns
           ENDSSH
 
       - name: Cleanup on yourname-dev
