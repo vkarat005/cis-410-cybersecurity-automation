@@ -3,184 +3,355 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CorpDirectory — {{ environment | upper }}</title>
+  <title>CIS 410 &mdash; {{ env | upper }} Deployment Dashboard</title>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --ink:#0f0f14;--ink2:#3a3a4a;--ink3:#6b6b80;--ink4:#9999aa;
-      --surface:#fff;--surface2:#f7f7fa;--surface3:#f0f0f5;
-      --line:rgba(0,0,0,.07);--line2:rgba(0,0,0,.12);
-      --red-text:#7f1d1d;--red-bg:#fff5f5;--red-border:#fca5a5;--red:#c0392b;
-      --amber:#92400e;--amber-bg:#fffbeb;--amber-border:#fcd34d;
-      --blue:#1e40af;--blue-bg:#eff6ff;--blue-border:#93c5fd;
-      --green:#166534;--green-bg:#f0fdf4;--green-border:#86efac;
-      --mono:'Consolas','Menlo',monospace;
-      --sans:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Tokens ── */
+    :root {
+      --navy:      #1F3864;
+      --blue:      #2E75B6;
+      --blue-pale: #EBF3FB;
+      --blue-text: #0C447C;
+      --green-bg:  #EAF3DE;
+      --green-text:#27500A;
+      --amber-bg:  #FFF2CC;
+      --amber-text:#633806;
+      --red-bg:    #FFC7CE;
+      --red-text:  #9C0006;
+      --gray-bg:   #F4F4F4;
+      --gray-text: #444441;
+      --border:    rgba(0,0,0,.1);
+      --surface:   #ffffff;
+      --page:      #F1EFE8;
+      --text:      #1a1a1a;
+      --text-muted:#666666;
+      --text-hint: #999999;
+      --mono:      'Consolas', 'SF Mono', 'Menlo', monospace;
+      --sans:      -apple-system, 'Segoe UI', Arial, sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
     }
-    body{font-family:var(--sans);background:var(--surface2);color:var(--ink);font-size:13.5px;line-height:1.6;min-height:100vh}
-    .topbar{background:#0f0f14;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:14px}
-    .brand-mark{width:34px;height:34px;background:#c0392b;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .brand-mark svg{width:19px;height:19px}
-    .brand-name{font-size:15px;font-weight:600;color:#fff;letter-spacing:-.3px}
-    .brand-sub{font-size:11px;color:rgba(255,255,255,.33);letter-spacing:.1px}
-    .env-tag{display:flex;align-items:center;gap:7px;background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.35);padding:5px 12px;border-radius:6px}
-    .env-dot{width:7px;height:7px;border-radius:50%;background:#ef4444}
-    .env-label{font-size:11.5px;font-weight:500;color:#fca5a5;letter-spacing:.2px}
-    .nav{background:rgba(15,15,20,.97);border-bottom:1px solid rgba(255,255,255,.06);padding:0 24px;display:flex}
-    .nav a{font-size:13px;color:rgba(255,255,255,.45);padding:12px 16px;text-decoration:none;border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px}
-    .nav a svg{width:14px;height:14px;opacity:.6}
-    .nav a:hover{color:rgba(255,255,255,.75)}
-    .nav a.active{color:#fff;border-bottom-color:#ef4444}
-    .nav a.active svg{opacity:1}
-    .main{max-width:920px;margin:0 auto;padding:32px 24px 64px}
-    .page-title{font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.3px;margin-bottom:5px}
-    .page-sub{font-size:13px;color:var(--ink3);margin-bottom:28px}
-    .warn{background:#fff5f5;border:1px solid #fca5a5;border-radius:10px;padding:15px 18px;margin-bottom:28px;display:flex;gap:13px;align-items:flex-start}
-    .warn-stripe{width:3px;background:#ef4444;border-radius:2px;flex-shrink:0;align-self:stretch}
-    .warn-icon{width:22px;height:22px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-    .warn-icon svg{width:12px;height:12px}
-    .warn-title{font-size:13px;font-weight:600;color:var(--red-text);margin-bottom:3px}
-    .warn-body{font-size:12.5px;color:#991b1b;line-height:1.55}
-    .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-    .panel-header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-    .panel-title{font-size:13px;font-weight:600;color:var(--ink)}
-    .panel-meta{font-size:11.5px;color:var(--ink4)}
-    code,.code{font-family:var(--mono);font-size:11px;background:var(--surface3);padding:1px 5px;border-radius:4px;color:var(--ink2)}
-    .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.3px;white-space:nowrap;flex-shrink:0}
-    .badge-high{background:#fee2e2;color:#7f1d1d}
-    .badge-med{background:#fef9c3;color:#713f12}
-    .badge-ok{background:#dcfce7;color:#14532d}
-    .tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--ink4);background:var(--surface3);border:0.5px solid var(--line2);border-radius:4px;padding:1px 6px;margin-top:4px}
-    footer{text-align:center;font-size:11px;color:var(--ink4);padding:28px 0 16px;border-top:1px solid var(--line);margin-top:36px;letter-spacing:.1px}
-    .card-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:28px}
-    .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:inherit;display:block}
-    .card:hover{border-color:var(--line2);transform:translateY(-1px)}
-    .card.card-alert{border-color:#fca5a5}
-    .card.card-alert:hover{border-color:#ef4444}
-    .card-eyebrow{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px}
-    .eyebrow-dot{width:6px;height:6px;border-radius:50%}
-    .card-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px}
-    .card-desc{font-size:12px;color:var(--ink3);line-height:1.55}
-    .vuln-row{display:flex;align-items:flex-start;gap:13px;padding:13px 20px;border-bottom:1px solid rgba(0,0,0,.04)}
-    .vuln-row:last-child{border-bottom:none}
-    .vuln-name{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:3px}
-    .vuln-desc{font-size:12px;color:var(--ink3);line-height:1.5}
+
+    body {
+      font-family: var(--sans);
+      background: var(--page);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--navy);
+      padding: 0 24px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-left  { display: flex; align-items: center; gap: 14px; }
+    .topbar-icon  {
+      width: 30px; height: 30px;
+      background: var(--blue);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .topbar-icon svg { width: 16px; height: 16px; }
+    .topbar-title { font-size: 15px; font-weight: 500; color: #fff; }
+    .topbar-sub   { font-size: 12px; color: #7bafd4; margin-top: 1px; }
+    .env-badge {
+      background: #0D7377;
+      color: #9FE1CB;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 12px;
+      border-radius: 20px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    /* ── Main layout ── */
+    .main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-hint);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin: 28px 0 12px;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* ── Metric cards ── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+    .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .metric-value { font-size: 20px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 7px; }
+    .metric-sub   { font-size: 11px; color: var(--text-hint); margin-top: 3px; }
+    .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: #639922; }
+    .dot-blue  { background: #185FA5; }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .panel-header {
+      padding: 12px 18px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-title { font-size: 13px; font-weight: 500; color: var(--text); }
+    .panel-body  { padding: 4px 18px; }
+
+    /* ── Info rows ── */
+    .info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,.06);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-key { font-size: 13px; color: var(--text-muted); }
+    .info-val { font-size: 13px; font-family: var(--mono); color: var(--text); }
+
+    /* ── Badges ── */
+    .badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-family: var(--sans);
+    }
+    .badge-green  { background: var(--green-bg);  color: var(--green-text); }
+    .badge-blue   { background: var(--blue-pale); color: var(--blue-text); }
+    .badge-amber  { background: var(--amber-bg);  color: var(--amber-text); }
+
+    /* ── Security grid ── */
+    .sec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 480px) { .sec-grid { grid-template-columns: 1fr; } }
+    .sec-item {
+      background: var(--gray-bg);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+    .sec-item-label { font-size: 11px; color: var(--text-hint); margin-bottom: 3px; }
+    .sec-item-val   { font-size: 13px; font-weight: 500; color: var(--text); }
+    .sec-item-val.pass { color: var(--green-text); }
+
+    /* ── Health list ── */
+    .health-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,.06);
+    }
+    .health-row:last-child { border-bottom: none; }
+    .health-icon {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .health-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .health-path { font-size: 12px; color: var(--text-muted); font-family: var(--mono); }
+    .health-status { margin-left: auto; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-hint);
+      padding: 32px 0 16px;
+      border-top: 0.5px solid var(--border);
+      margin-top: 32px;
+    }
   </style>
 </head>
 <body>
-<nav class="topbar">
-  <div class="brand">
-    <div class="brand-mark">
-      <svg viewBox="0 0 19 19" fill="none">
-        <circle cx="9.5" cy="7" r="4" stroke="rgba(255,255,255,.85)" stroke-width="1.5"/>
-        <path d="M2 18c0-3.5 3.4-6 7.5-6s7.5 2.5 7.5 6" stroke="rgba(255,255,255,.85)" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div>
-      <div class="brand-name">CorpDirectory</div>
-      <div class="brand-sub">Internal employee lookup &mdash; {{ hostname }}</div>
-    </div>
-  </div>
-  <div class="env-tag">
-    <div class="env-dot"></div>
-    <span class="env-label">{{ environment | upper }} &nbsp;/&nbsp; VULNERABLE</span>
-  </div>
-</nav>
-<div class="nav">
-  <a href="/" class="active">
-    <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
-    Overview
-  </a>
-  <a href="/search">
-    <svg viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-    User search
-  </a>
-  <a href="/debug">
-    <svg viewBox="0 0 14 14" fill="none"><rect x="2" y="4" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 4V3a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.2"/></svg>
-    Debug
-  </a>
-</div>
-<main class="main">
-  <div class="warn">
-    <div class="warn-stripe"></div>
-    <div class="warn-icon">
-      <svg viewBox="0 0 12 12" fill="none"><path d="M6 2.5v3.8M6 8.8h.01" stroke="#c0392b" stroke-width="1.4" stroke-linecap="round"/><path d="M5.13 1.5L1 9.5h10L6.87 1.5a1 1 0 00-1.74 0z" stroke="#c0392b" stroke-width="1" stroke-linejoin="round"/></svg>
-    </div>
-    <div>
-      <div class="warn-title">Intentionally vulnerable &mdash; CIS 410 Week 4</div>
-      <div class="warn-body">Deployed to <strong>{{ environment }}</strong> only. Staging and production run the secure Week&nbsp;3 app. Observe the vulnerabilities below before Week&nbsp;5 adds automated security scanning.</div>
-    </div>
-  </div>
 
-  <div class="page-title">CorpDirectory</div>
-  <div class="page-sub">A fictional internal tool purpose-built with real vulnerabilities for CIS 410 observation.</div>
+  <!-- Top navigation bar -->
+  <nav class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="#7bafd4"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="#7bafd4"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="#7bafd4"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="rgba(123,175,212,.4)"/>
+        </svg>
+      </div>
+      <div>
+        <div class="topbar-title">CIS 410 &mdash; DevSecOps Platform</div>
+        <div class="topbar-sub">Deployment Status Dashboard</div>
+      </div>
+    </div>
+    <div class="env-badge">{{ env }}</div>
+  </nav>
 
-  <div class="card-row">
-    <a class="card" href="/search">
-      <div class="card-eyebrow" style="color:#1e40af"><div class="eyebrow-dot" style="background:#1e40af"></div>Search</div>
-      <div class="card-title">User search</div>
-      <div class="card-desc">Look up employees by username. Try a payload like <code>' OR '1'='1</code> to bypass the WHERE clause and return every record.</div>
-    </a>
-    <a class="card card-alert" href="/search?q=%27+OR+%271%27%3D%271">
-      <div class="card-eyebrow" style="color:#c0392b"><div class="eyebrow-dot" style="background:#ef4444"></div>SQL injection</div>
-      <div class="card-title">Injection demo</div>
-      <div class="card-desc">Pre-loaded payload &mdash; returns all 6 records in a single request without knowing any valid username.</div>
-    </a>
-    <a class="card" href="/debug">
-      <div class="card-eyebrow" style="color:#92400e"><div class="eyebrow-dot" style="background:#f59e0b"></div>Info disclosure</div>
-      <div class="card-title">Debug endpoint</div>
-      <div class="card-desc">All container env vars with no auth. Exposes <code>DEPLOY_TIME</code>, <code>COMMIT_SHA</code>, and every injected secret.</div>
-    </a>
-  </div>
+  <main class="main">
 
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">Vulnerabilities in this build</span>
-      <span class="panel-meta">5 issues &nbsp;&middot;&nbsp; 3 HIGH &nbsp;&middot;&nbsp; 2 MEDIUM</span>
-    </div>
-    <div class="vuln-row">
-      <span class="badge badge-high">HIGH</span>
-      <div>
-        <div class="vuln-name">SQL injection &mdash; /search</div>
-        <div class="vuln-desc">String concatenation: <code>WHERE username = '" + q + "'"</code>. One malformed input returns every row.</div>
-        <div><span class="tag">Semgrep &middot; SAST</span></div>
+    <!-- Metric cards -->
+    <p class="section-label">Overview</p>
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label">Status</div>
+        <div class="metric-value"><span class="dot dot-green"></span> Running</div>
+        <div class="metric-sub">Container healthy</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Environment</div>
+        <div class="metric-value">{{ env }}</div>
+        <div class="metric-sub">Port {{ port }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">App version</div>
+        <div class="metric-value">{{ version }}</div>
+        <div class="metric-sub">week3-release</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Pipeline</div>
+        <div class="metric-value"><span class="dot dot-blue"></span> Passing</div>
+        <div class="metric-sub">{{ workflow }}</div>
       </div>
     </div>
-    <div class="vuln-row">
-      <span class="badge badge-high">HIGH</span>
-      <div>
-        <div class="vuln-name">Information disclosure &mdash; /debug</div>
-        <div class="vuln-desc">Unauthenticated endpoint returns all environment variables. No login, no token, no restriction.</div>
-        <div><span class="tag">OWASP ZAP &middot; DAST</span></div>
+
+    <!-- Deployment info -->
+    <p class="section-label">Deployment info</p>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Container &amp; host</span>
+      </div>
+      <div class="panel-body">
+        <div class="info-row">
+          <span class="info-key">Container hostname</span>
+          <span class="info-val">{{ hostname }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Host VM</span>
+          <span class="info-val">{{ env }}-vm</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Deployed at</span>
+          <span class="info-val">{{ deploy_time }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Commit SHA</span>
+          <span class="info-val">{{ commit_sha }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Branch</span>
+          <span class="info-val">{{ branch }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Triggered by</span>
+          <span class="info-val">{{ workflow }}</span>
+        </div>
       </div>
     </div>
-    <div class="vuln-row">
-      <span class="badge badge-high">HIGH</span>
-      <div>
-        <div class="vuln-name">Container runs as root</div>
-        <div class="vuln-desc">No <code>USER</code> instruction in Dockerfile. Verify: <code>docker compose exec web whoami</code> &rarr; <code>root</code>.</div>
-        <div><span class="tag">Trivy &middot; Container</span></div>
+
+    <!-- Container security -->
+    <p class="section-label">Security checks</p>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Container hardening</span>
+        <span class="badge badge-green">All rules passing</span>
+      </div>
+      <div class="panel-body" style="padding-top:14px; padding-bottom:14px;">
+        <div class="sec-grid">
+          <div class="sec-item">
+            <div class="sec-item-label">Running user</div>
+            <div class="sec-item-val pass">appuser (non-root)</div>
+          </div>
+          <div class="sec-item">
+            <div class="sec-item-label">Base image</div>
+            <div class="sec-item-val">python:3.11-slim</div>
+          </div>
+          <div class="sec-item">
+            <div class="sec-item-label">Secrets storage</div>
+            <div class="sec-item-val pass">GitHub Secrets</div>
+          </div>
+          <div class="sec-item">
+            <div class="sec-item-label">.dockerignore</div>
+            <div class="sec-item-val pass">Present</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="vuln-row">
-      <span class="badge badge-med">MEDIUM</span>
-      <div>
-        <div class="vuln-name">Werkzeug debug mode enabled</div>
-        <div class="vuln-desc"><code>debug=True</code> in <code>app.run()</code> &mdash; exposes interactive debugger, remote code execution risk.</div>
-        <div><span class="tag">Semgrep &middot; SAST</span></div>
+
+    <!-- Health endpoints -->
+    <p class="section-label">Health endpoints</p>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Service health</span>
+      </div>
+      <div class="panel-body">
+        <div class="health-row">
+          <div class="health-icon" style="background:var(--green-bg)">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7l3.5 3.5L12 3.5" stroke="#27500A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="health-name">Home</div>
+            <div class="health-path">/</div>
+          </div>
+          <div class="health-status"><span class="badge badge-green">200 OK</span></div>
+        </div>
+        <div class="health-row">
+          <div class="health-icon" style="background:var(--green-bg)">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7l3.5 3.5L12 3.5" stroke="#27500A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="health-name">Health check</div>
+            <div class="health-path">/health &nbsp;&mdash;&nbsp; returns JSON</div>
+          </div>
+          <div class="health-status"><span class="badge badge-green">200 OK</span></div>
+        </div>
       </div>
     </div>
-    <div class="vuln-row">
-      <span class="badge badge-med">MEDIUM</span>
-      <div>
-        <div class="vuln-name">Unpinned base image</div>
-        <div class="vuln-desc"><code>FROM python:3.11</code> resolves to a different digest on every pull. Non-reproducible, silent CVE introduction.</div>
-        <div><span class="tag">Trivy &middot; SCA</span></div>
-      </div>
-    </div>
-  </div>
-</main>
-<footer>CIS 410: Cybersecurity Automation &nbsp;&middot;&nbsp; Week 4 &nbsp;&middot;&nbsp; {{ hostname }} &nbsp;&middot;&nbsp; {{ environment }} &nbsp;&middot;&nbsp; port {{ port }}</footer>
+
+  </main>
+
+  <footer>
+    CIS 410: Cybersecurity Automation &nbsp;&mdash;&nbsp; {{ env }}-vm &nbsp;&mdash;&nbsp; port {{ port }} &nbsp;&mdash;&nbsp; v{{ version }}
+  </footer>
+
 </body>
 </html>
